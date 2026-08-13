@@ -1,0 +1,176 @@
+創建
+
+先確認是否滿15個總公司(如果超過
+產新的數據庫集群
+sh /data/rds/add-rds-cluster.sh scmk02-live ap-east-1
+
+查詢新的集群的URL
+sh /data/rds/list-rds-cluster-w.sh scmk02-live
+
+--------------
+
+導入數據庫
+sh scmk-1010-dump.sh cs06 scmk-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com
+
+創建讀的硬體數據庫
+sh add-rds-slave.sh scmk-live scmk001-slave01 db.r6g.large
+
+建NODE 執行完後約等10分鐘
+sh /data/eks/add-eks-node.sh zjinhui 001 m6g.xlarge
+
+建REDIS 執行完後約等5分鐘
+sh /data/ec2/create-aws-ec2.sh zjinhui-redis01 subnet-06ea9039ad65dad03 10.7.208.10 c6g.xlarge
+
+10.7.200.10~10.7.207.250 subnet-0f92f949892823d9f
+10.7.208.10~10.7.215.250 subnet-06ea9039ad65dad03
+10.7.216.10~10.7.223.254 subnet-06100459a705afade
+
+查詢RDS的讀連結URL
+sh /data/rds/list-rds-slave.sh zjinhui001-slave01
+
+建置服務先建JAVA
+sh update-agent-java-pod.sh scmk 001 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
+
+update-agent-java-pod.sh
+update-downodds-java-pod.sh
+update-portal-java-pod.sh
+update-schedule-java-pod.sh
+update-settlement-java-pod.sh
+update-websocke-java-pod.sh 
+
+update-agent-nginx-pod.sh
+sh /data/eks/update-agent-nginx-pod.sh scmk 001
+
+update-menber-nginx-pod.sh
+sh /data/eks/update-menber-nginx-pod.sh scmk 001
+
+查詢服務的URL
+eks/get-eks-url.sh
+sh /data/eks/get-eks-url.sh scmk-agent-ng
+sh /data/eks/get-eks-url.sh scmk-mnber-ng
+
+sh /data/eks/get-eks-url.sh scmk-agent-java
+sh /data/eks/get-eks-url.sh scmk-portal-java
+
+eks/get-eks-websocke-url.sh
+sh /data/eks/get-eks-websocke-url.sh scmk-websocke-java
+
+設定新CDN設定聊天室域名
+sh /data/ec2/add-cdnray.sh test001 alb-test001-websocke-java-179344061.ap-east-1.elb.amazonaws.com 
+------------
+500人升1000人
+
+先創RDS
+sh add-rds-slave.sh scmk-live scmk001-slave02 db.r6g.xlarge
+
+創node
+建NODE 
+sh /data/eks/add-eks-node.sh zjinhui 002 m6g.2xlarge
+
+等10分鐘查新的讀 數據庫URL
+sh list-rds-slave.sh zjinhui001-slave02 ap-east-1
+
+重建服務(修改參數 改；NODE ID 、讀數據庫
+
+然後刪除舊的硬體(讀數據庫、NODE)
+
+sh del-rds-slave.sh scmk001-slave01 ap-east-1
+
+sh del-eks-formation.sh scmk 001
+-------------
+1000人升2000人
+
+先創RDS
+sh add-rds-slave.sh scmk-live scmk001-slave03 db.r6g.xlarge
+sh add-rds-slave.sh scmk-live scmk001-slave04 db.r6g.xlarge
+
+等10分鐘、將剛創兩台數據庫加入，附載平衡URL(建好後會輸出URL
+sh add-rds-endpoint.sh scmk-live scmk001-endpoint scmk001-slave01 scmk001-slave02 scmk001-slave03
+
+創node
+sh /data/eks/add-eks-node.sh zjinhui 003 r6g.2xlarge
+
+重建服務(修改參數 改；NODE ID 、讀數據庫
+建置服務先建JAVA
+sh update-agent-java-pod.sh scmk 001 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
+
+update-agent-java-pod.sh
+update-downodds-java-pod.sh
+update-portal-java-pod.sh
+update-schedule-java-pod.sh
+update-settlement-java-pod.sh
+update-websocke-java-pod.sh 
+
+update-agent-nginx-pod.sh
+update-menber-nginx-pod.sh
+(2000人多創前端服務
+update-agent-nginx02-pod.sh
+update-menber-nginx02-pod.sh
+
+查詢服務的URL
+sh /data/eks/get-eks-url.sh scmk-agent-ng02
+sh /data/eks/get-eks-url.sh scmk-mnber-ng02
+
+重新設定域名
+先刪除舊專案域名
+/data/ec2/1010/del-nginx-80p.sh scmk
+重新設定域名檔案
+其中的AZURE CDN域名要設定scmk-agent-ng02、scmk-mnber-ng02。其他都用原本的
+yhr1.net
+cvf1.net
+
+
+然後刪除舊的硬體(讀數據庫、NODE)
+
+sh del-rds-slave.sh scmk001-slave02 ap-east-1
+
+sh del-eks-formation.sh scmk 002
+---------
+2000人降 1000人
+
+先創RDS
+sh add-rds-slave.sh scmk-live scmk001-slave02 db.r6g.xlarge
+
+創node
+建NODE 
+sh /data/eks/add-eks-node.sh zjinhui 002 m6g.2xlarge
+
+等10分鐘查新的讀 數據庫URL
+sh list-rds-slave.sh zjinhui001-slave02 ap-east-1
+
+重建服務(修改參數 改；NODE ID 、讀數據庫
+建置服務先建JAVA
+sh update-agent-java-pod.sh scmk 001 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
+
+update-agent-java-pod.sh
+update-downodds-java-pod.sh
+update-portal-java-pod.sh
+update-schedule-java-pod.sh
+update-settlement-java-pod.sh
+update-websocke-java-pod.sh 
+
+update-agent-nginx-pod.sh
+update-menber-nginx-pod.sh
+
+重新設定域名
+先刪除舊專案域名
+/data/ec2/1010/del-nginx-80p.sh scmk
+重新設定域名檔案
+讓原本AZURE 域名改回原本的前端URL
+yhr1.net
+cvf1.net
+
+然後刪除舊的硬體(讀數據庫、NODE、pod ng02
+sh del-rds-slave.sh scmk001-slave03 ap-east-1
+sh del-rds-slave.sh scmk001-slave04 ap-east-1
+
+sh del-scmk-1010-rds-endpoint.sh test001-endpoint ap-east-1
+
+刪除2000人多出來的前端
+kubectl delete deployment.apps/cs08-agent-ng02
+kubectl delete deployment.apps/cs08-mnber-ng02
+
+kubectl delete service/cs08-agent-ng02
+kubectl delete service/cs08-mnber-ng02
+
+sh del-eks-formation.sh scmk 003

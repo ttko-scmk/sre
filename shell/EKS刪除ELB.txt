@@ -1,0 +1,40 @@
+沒問題，一次清空最乾淨。這段腳本會從 Listener、Target Groups 到 NLB 本身 全部掃描一遍，只要名字對得上的通通刪除。
+
+第一步：強制清理腳本 (全自動)
+請直接複製並執行這段指令：
+
+Bash
+echo "開始全面清理資源..."
+
+# 1. 刪除 NLB
+NLB_NAME="scmk666-qa-internal-shared-nlb"
+NLB_ARN=$(aws elbv2 describe-load-balancers --names $NLB_NAME --query 'LoadBalancers[0].LoadBalancerArn' --output text 2>/dev/null)
+
+if [ "$NLB_ARN" != "None" ] && [ -n "$NLB_ARN" ]; then
+    echo "正在刪除 NLB: $NLB_NAME..."
+    aws elbv2 delete-load-balancer --load-balancer-arn $NLB_ARN
+    echo "等待 NLB 釋放資源 (15秒)..."
+    sleep 15 # 必須等 NLB 開始刪除，Listener 才會跟著消失
+else
+    echo "未發現 NLB: $NLB_NAME"
+fi
+
+# 2. 刪除 Target Groups (80 與 81)
+for tg_name in tg-scmk-666-int-80 tg-scmk-666-int-81; do
+    TG_ARN=$(aws elbv2 describe-target-groups --names $tg_name --query 'TargetGroups[0].TargetGroupArn' --output text 2>/dev/null)
+    if [ "$TG_ARN" != "None" ] && [ -n "$TG_ARN" ]; then
+        echo "正在刪除 Target Group: $tg_name..."
+        aws elbv2 delete-target-group --target-group-arn $TG_ARN
+    else
+        echo "未發現 Target Group: $tg_name"
+    fi
+done
+
+echo "清理完成！現在你可以重新開始了。"
+
+# 刪除你剛才測試用的 Service 和 Deployment
+kubectl delete service scmk666-agent-ng
+kubectl delete deployment scmk10100-agent-ng
+
+# 同時建議把舊的、有問題的 TargetGroupBinding 也刪了
+kubectl delete targetgroupbinding scmk10100-agent-ng-tgb

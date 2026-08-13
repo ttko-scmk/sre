@@ -1,0 +1,91 @@
+創建
+
+先確認是否滿15個總公司(如果超過
+產新的數據庫集群
+sh /data/rds/add-rds-cluster.sh scmk02-666 ap-east-1
+
+查詢新的集群的URL
+sh /data/rds/list-rds-cluster-w.sh scmk02-666
+
+-------------------------------
+導入數據庫
+sh /data/rds/scmk-666-dump.sh cs06
+
+創建讀的硬體數據庫
+sh /data/rds/add-rds-serverless.sh scmk-666 greed-slave666-01
+
+建NODE 執行完後約等10分鐘
+sh /data/eks/add-eks-node.sh zjinhui 001 c6g.xlarge
+
+sh /data/eks/add-eks-node.sh zjinhui 101 m6g.xlarge
+
+建REDIS 執行完後約等5分鐘
+sh /data/ec2/666/create-aws-ec2.sh zjinhui-redis01 subnet-0a962afadd540cbe2 10.12.208.10 c6g.large
+
+#sh create-aws-ec2.sh scmk-redis01 subnet-0a962afadd540cbe2 10.12.200.10 c6g.large
+#sh create-aws-ec2.sh scmk-redis01 subnet-0f1ee7056b9aa80cb 10.12.208.10 c6g.large
+#sh create-aws-ec2.sh scmk-redis01 subnet-0984e92fc1de3d715 10.12.216.10 c6g.large
+
+查詢RDS的讀連結URL
+sh /data/rds/list-rds-slave.sh greed-slave666-01
+
+建置服務先建JAVA
+sh /data/eks/666/update-agent-java-pod.sh zjinhui 001 scmk-666-master.cfwgoc26ygpd.ap-east-1.rds.amazonaws.com scmk-666-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.12.200.10 logstash.taidagediao.com:4590
+
+update-agent-java-pod.sh
+update-downodds-java-pod.sh
+update-portal-java-pod.sh
+update-schedule-java-pod.sh
+update-websocke-java-pod.sh 
+
+update-settlement-java-pod.sh zjinhui 101 scmk-666-master.cfwgoc26ygpd.ap-east-1.rds.amazonaws.com scmk-666-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.12.200.10 logstash.taidagediao.com:4590
+
+update-agent-nginx-pod.sh
+sh /data/eks/666/update-agent-nginx-pod.sh scmk 001
+
+update-menber-nginx-pod.sh
+sh /data/eks/666/update-menber-nginx-pod.sh scmk 001
+
+查詢服務的URL
+eks/get-eks-url.sh
+sh /data/eks/666/get-eks-url.sh scmk-agent-ng
+sh /data/eks/666/get-eks-url.sh scmk-mnber-ng
+
+sh /data/eks/666/get-eks-url.sh scmk-agent-java
+sh /data/eks/666/get-eks-url.sh scmk-portal-java
+
+eks/get-eks-websocke-url.sh
+sh /data/eks/666/get-eks-websocke-url.sh scmk-websocke-java
+
+設定新CDN設定聊天室域名 -666-websocke.taidagediao.com
+sh /data/ec2/666/add-cdnray.sh test001 alb-test001-websocke-java-179344061.ap-east-1.elb.amazonaws.com 
+
+創建CDN 節點nginx 設定檔
+
+
+500人 
+001 規格 c6g.xlarge
+101 規格 c6g.xlarge
+REDIS 規格 c6g.large
+-------------
+1000人
+001 規格 c6g.xlarge (不用動)
+101 規格 c6g.xlarge (不用動)
+REDIS 規格 m6g.large
+-------------
+2000人
+001 規格 c6g.xlarge (不用動)
+002 規格 c6g.xlarge 多創建
+用途：把02的前端 update-agent-nginx02-pod.sh  ​update-agent-nginx02-pod.sh
+放進002 VM裡面
+101 規格 c6g.xlarge (不用動)
+REDIS 規格 m6g.xlarge
+
+刪除全部域名，然後全部重新設定
+另外
+sdvw5.com
+5sf5q.com
+
+yjtr5.com
+rt56v.com
+上面這四個域名的代理 會員NG URL 改成 02 VM URL

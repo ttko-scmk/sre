@@ -1,0 +1,20 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/web_access.log
+  json.keys_under_root: true
+  json.overwrite_keys: true
+setup.kibana:
+  host: "https://ttkx-elk.kb.asia-east1.gcp.elastic-cloud.com:9243"
+output.elasticsearch:
+  hosts: ["https://ttkx-elk.es.asia-east1.gcp.elastic-cloud.com:443"]
+  index: "ttkx-6-%{+yyyy-MM-dd}"
+  username: "elastic"
+  password: "hwAFPmBoFr8iRUjFrMeEw72I"
+setup.template.name: "ttkx-6"
+setup.template.pattern: "ttkx-6-*"
+setup.template.enabled: false
+setup.template.overwrite: true
+setup.ilm.enabled: false
+timeout: 2s

@@ -1,0 +1,19 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/web_access.log
+  json.expand_keys: true
+setup.kibana:
+  host: "https://ttkx-elk.kb.asia-east1.gcp.elastic-cloud.com:9243"
+output.elasticsearch:
+  hosts: ["https://ttkx-elk.es.asia-east1.gcp.elastic-cloud.com:443"]
+  index: "nva-1010-live-%{+yyyy-MM-dd}"
+  username: "elastic"
+  password: "hwAFPmBoFr8iRUjFrMeEw72I"
+setup.template.name: "nva-1010-live"
+setup.template.pattern: "nva-1010-live-*"
+setup.template.enabled: false
+setup.template.overwrite: true
+setup.ilm.enabled: false
+timeout: 2s

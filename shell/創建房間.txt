@@ -1,0 +1,66 @@
+#將預設資料庫匯出
+sh /data/rds/scmk-room-dump.sh scmk scmk-room.cluster-cbqaoyq2629x.ap-east-1.rds.amazonaws.com
+#創建讀的數據庫
+sh /data/rds/add-rds-slave.sh scmk-room scmk001-slave01 db.t4g.medium
+#創建K8S NODE VM
+sh /data/eks/room/add-eks-node.sh scmk 001 c6g.xlarge
+#創建房間的REDIS
+sh /data/ec2/room/create-aws-ec2.sh scmk-room-redis01 subnet-06e3f1dfc2b430559 10.2.200.10 t4g.medium
+#查詢房間數據庫的URL
+sh /data/rds/list-rds-slave.sh scmk001-slave01 ap-east-1
+
+#更新服務
+sh /data/eks/room/update-appprojava-pod.sh scmk 001 scmk-room.cluster-cbqaoyq2629x.ap-east-1.rds.amazonaws.com scmk001-slave01.cbqaoyq2629x.ap-east-1.rds.amazonaws.com:3306/scmk 10.2.200.10 logstash.taidagediao.com:4560
+sh /data/eks/room/update-websocke-java-pod.sh scmk 001 scmk-room-master01.cbqaoyq2629x.ap-east-1.rds.amazonaws.com scmk001-slave01.cbqaoyq2629x.ap-east-1.rds.amazonaws.com:3306/scmk 10.2.200.10 logstash.taidagediao.com:4560
+
+sh /data/eks/room/update-sysroom-nginx-pod.sh scmk 001
+sh /data/eks/room/update-sysroomht-nginx-pod.sh scmk 001
+
+#查詢 服務的K8S 長連結
+sh /data/eks/room/get-eks-url.sh scmk-roompro-java
+sh /data/eks/room/get-eks-url.sh scmk-sysroom-ng
+sh /data/eks/room/get-eks-url.sh scmk-sysroomht-ng
+
+sh /data/eks/room/get-eks-websocke-url.sh scmk-websocke-java
+
+#創建聊天室域名
+sh /data/ec2/room/add-cdnray.sh scmk alb-scmk-websocke-java-142271280.ap-east-1.elb.amazonaws.com
+
+#先創三個線路
+gdb8.net AWS-CDN
+jyu5.net CF
+fgh1.com CDN-RAY
+#唯獨scmk-sysroomht-ng，只建立gdb8.net AWS-CDN
+
+sh /data/ec2/room/add-nginx-80p.sh scmk-1ap.gdb8.net nlb-scmk-sysroom-ng-4d71f067ed48b40b.elb.ap-east-1.amazonaws.com nlb-scmk-roompro-java-bff7ef81f9470a3f.elb.ap-east-1.amazonaws.com
+sh /data/ec2/room/add-nginx-80p.sh scmk-1ap.fgh1.com nlb-scmk-sysroom-ng-9f179dd881cf860a.elb.ap-east-1.amazonaws.com nlb-scmk-roompro-java-8be5ca530aa52c0a.elb.ap-east-1.amazonaws.com
+
+sh /data/ec2/room/create-clear-all.sh
+
+------------
+升規格
+
+#創建第二個讀的數據庫
+sh /data/rds/add-rds-slave.sh scmk-room scmk001-slave02 db.t4g.large
+#查詢第二個讀的數據庫URL
+sh /data/rds/list-rds-slave.sh scmk001-slave02 ap-east-1
+#將JAVA服務更新，更換讀的URL
+sh /data/eks/room/update-appprojava-pod02.sh scmk 001 scmk-room.cluster-cbqaoyq2629x.ap-east-1.rds.amazonaws.com scmk001-slave02.cbqaoyq2629x.ap-east-1.rds.amazonaws.com:3306/scmk 10.2.200.10 logstash.taidagediao.com:4560
+sh /data/eks/room/update-websocke-java-pod.sh scmk 001 scmk-room-master01.cbqaoyq2629x.ap-east-1.rds.amazonaws.com scmk001-slave02.cbqaoyq2629x.ap-east-1.rds.amazonaws.com:3306/scmk 10.2.200.10 logstash.taidagediao.com:4560
+#刪除舊的數據庫
+sh /data/rds/del-rds-slave.sh scmk001-slave01 ap-east-1
+
+
+sh /data/ec2/room/clear-all.sh
+----
+換域名
+sh /data/ec2/room/del-nginx-80p.sh scmk
+
+sh /data/ec2/room/add-nginx-80p.sh scmk-147.gdb8.net nlb-scmk-sysroom-ng-4d71f067ed48b40b.elb.ap-east-1.amazonaws.com nlb-scmk-roompro-java-bff7ef81f9470a3f.elb.ap-east-1.amazonaws.com
+
+sh /data/ec2/room/clear-all.sh
+----
+全部刪除
+sh /data/eks/room/del-eks-all.sh scmk 001 10.2.200.10
+
+sh /data/rds/del-rds-slave.sh scmk001-slave02 ap-east-1

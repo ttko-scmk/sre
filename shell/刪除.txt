@@ -1,0 +1,5 @@
+全部刪除(POD服務、服務ELB、刪除NODE、刪除域名檔案、刪除REDIS、刪除聊天室域名)
+del-eks-all.sh scmk 001 10.7.200.10
+
+刪除域名讀的數據庫
+sh del-rds-slave.sh scmk001-slave01 ap-east-1

@@ -1,0 +1,70 @@
+# --- 1. 基礎參數設定 ---
+VPC_ID="vpc-0b175b229fcebeee4"
+SUBNETS="subnet-084e128e27f76d7a3 subnet-0171bc2db6d457351 subnet-098657d640fc746f7"
+MY_SG_ID="sg-015af4d5296f1731d"
+NLB_NAME="ttko-open-qa-internal-shared-nlb"
+
+echo "建立 Internal NLB..."
+NLB_ARN=$(aws elbv2 create-load-balancer \
+    --name $NLB_NAME \
+    --type network \
+    --subnets $SUBNETS \
+    --scheme internal \
+    --security-groups $MY_SG_ID \
+    --query 'LoadBalancers[0].LoadBalancerArn' --output text)
+
+echo "建立 Target Group 80 (對應第一個 Pod)..."
+TG_80_ARN=$(aws elbv2 create-target-group \
+    --name tg-ttko-open-int-80 \
+    --protocol TCP --port 80 --vpc-id $VPC_ID --target-type ip \
+    --query 'TargetGroups[0].TargetGroupArn' --output text)
+
+echo "建立 Target Group 81 (對應第二個 Pod)..."
+TG_81_ARN=$(aws elbv2 create-target-group \
+    --name tg-ttko-open-int-81 \
+    --protocol TCP --port 80 --vpc-id $VPC_ID --target-type ip \
+    --query 'TargetGroups[0].TargetGroupArn' --output text)
+	
+echo "建立 Target Group 82 (對應第三個 Pod)..."
+TG_82_ARN=$(aws elbv2 create-target-group \
+    --name tg-ttko-open-int-82 \
+    --protocol TCP --port 80 --vpc-id $VPC_ID --target-type ip \
+    --query 'TargetGroups[0].TargetGroupArn' --output text)
+
+echo "建立 NLB 監聽器 (Listener)..."
+# 監聽 80 轉發至 TG 80
+aws elbv2 create-listener --load-balancer-arn $NLB_ARN --protocol TCP --port 80 --default-actions Type=forward,TargetGroupArn=$TG_80_ARN
+# 監聽 81 轉發至 TG 81
+aws elbv2 create-listener --load-balancer-arn $NLB_ARN --protocol TCP --port 81 --default-actions Type=forward,TargetGroupArn=$TG_81_ARN
+
+echo "------------------------------------------------"
+echo "AWS 資源建立完成！"
+echo "Port 80 TG ARN: $TG_80_ARN"
+echo "Port 81 TG ARN: $TG_81_ARN"
+echo "------------------------------------------------"
+
+echo "建立 Target Group 8081 (對應第一個 Pod)..."
+TG_8081_ARN=$(aws elbv2 create-target-group \
+    --name tg-ttko-open-int-8081 \
+    --protocol TCP --port 8081 --vpc-id $VPC_ID --target-type ip \
+    --query 'TargetGroups[0].TargetGroupArn' --output text)
+
+echo "建立 Target Group 8082 (對應第二個 Pod)..."
+TG_8082_ARN=$(aws elbv2 create-target-group \
+    --name tg-ttko-666-int-8082 \
+    --protocol TCP --port 8082 --vpc-id $VPC_ID --target-type ip \
+    --query 'TargetGroups[0].TargetGroupArn' --output text)
+
+echo "建立 NLB 監聽器 (Listener)..."
+# 監聽 8081 轉發至 TG 8081
+aws elbv2 create-listener --load-balancer-arn $NLB_ARN --protocol TCP --port 8081 --default-actions Type=forward,TargetGroupArn=$TG_8081_ARN
+# 監聽 8082 轉發至 TG 8082
+aws elbv2 create-listener --load-balancer-arn $NLB_ARN --protocol TCP --port 8082 --default-actions Type=forward,TargetGroupArn=$TG_8082_ARN
+# 監聽 8082 轉發至 TG 8082
+aws elbv2 create-listener --load-balancer-arn $NLB_ARN --protocol TCP --port 8082 --default-actions Type=forward,TargetGroupArn=$TG_8082_ARN
+
+echo "------------------------------------------------"
+echo "AWS 資源建立完成！"
+echo "Port 8081 TG ARN: $TG_8081_ARN"
+echo "Port 8082 TG ARN: $TG_8082_ARN"
+echo "------------------------------------------------"
