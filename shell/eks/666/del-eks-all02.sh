@@ -5,7 +5,7 @@ p=$2
 b=$3
 c=$4
 rm -rf /root/.kube/
-aws eks update-kubeconfig --region ap-east-1 --name scmk-666
+aws eks update-kubeconfig --region ap-east-1 --name dgp-live
 #刪除REDIS
 EC2_ID=`aws ec2 describe-instances --filters "Name=private-ip-address,Values=$b" --query "Reservations[0].Instances[0].InstanceId" --output text`
 aws ec2 terminate-instances --instance-ids "$EC2_ID" > /dev/null 2>&1
