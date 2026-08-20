@@ -188,4 +188,4 @@ systemctl enable openresty
 systemctl restart openresty
 
 echo "=== 安裝與設定完成 ==="
-/usr/local/openresty/nginx/sbin/nginx -V
+nginx  -V
