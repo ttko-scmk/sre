@@ -228,8 +228,8 @@ server {
     listen [::]:443 ssl default_server;
     
     # 相對路徑 (相對於 /usr/local/openresty/nginx/)
-    ssl_certificate     conf/ssl/ca.pem;
-    ssl_certificate_key conf/ssl/ca.key;
+    ssl_certificate     ssl/ca.pem;
+    ssl_certificate_key ssl/ca.key;
 
     add_header Strict-Transport-Security "max-age=63072000; includeSubdomains;";
 
