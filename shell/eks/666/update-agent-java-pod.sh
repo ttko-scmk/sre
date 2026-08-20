@@ -11,27 +11,27 @@ c=$6
 date_now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # exp
-# sh update-agent-java-pod.sh scmk 666-001 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
+# sh update-agent-java-pod.sh rfhgrt 666-01 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
 
 rm -rf /root/.kube/
 aws eks update-kubeconfig --region ap-east-1 --name dgp-live
 
-if kubectl get deployment.apps/"$v"-agent-java &> /dev/null; then
-  echo "Deployment "$v"-agent-java 存在，正在刪除..."
-  kubectl delete deployment.apps/"$v"-agent-java --force --grace-period=0
+if kubectl get deployment.apps/"${v}-${p}-agent-java" &> /dev/null; then
+  echo "Deployment ${v}-${p}-agent-java 存在，正在刪除..."
+  kubectl delete deployment.apps/"${v}-${p}-agent-java" --force --grace-period=0
   sleep 4
-  echo "Deployment "$v"-agent-java 已刪除。"
+  echo "Deployment ${v}-${p}-agent-java 已刪除。"
 else
-  echo "Deployment "$v"-agent-java 不存在，無需刪除。"
+  echo "Deployment ${v}-${p}-agent-java 不存在，無需刪除。"
 fi
 
 cat << EOF > 123.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "${v}-agent-java"
+  name: "${v}-${p}-agent-java"
   labels:
-    app: "${v}-agent-java"
+    app: "${v}-${p}-agent-java"
 spec:
   replicas: 1
   revisionHistoryLimit: 1
@@ -42,7 +42,7 @@ spec:
       maxSurge: 0
   selector:
     matchLabels:
-      app: "${v}-agent-java"
+      app: "${v}-${p}-agent-java"
   template:
     metadata:
       annotations:
@@ -50,7 +50,7 @@ spec:
         sidecar.opentelemetry.io/inject: "false"
         instrumentation.opentelemetry.io/inject-java: "false"
       labels:
-        app: "${v}-agent-java"
+        app: "${v}-${p}-agent-java"
     spec:
       serviceAccountName: s3-log-uploader-sa
       terminationGracePeriodSeconds: 60
@@ -60,7 +60,7 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app: "${v}-agent-java"
+              app: "${v}-${p}-agent-java"
       nodeSelector:
         dgplive: "${v}-${p}"
       volumes:
@@ -73,11 +73,11 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              SEARCH_KEY=\$(echo "${v}-agent-java" | tr -d '-')
-              echo "開始搜尋 S3 桶中關鍵字 [${v}-agent-java] 及 [\${SEARCH_KEY}] 的歷史 Log..."
+              SEARCH_KEY=\$(echo "${v}-${p}-agent-java" | tr -d '-')
+              echo "開始搜尋 S3 桶中關鍵字 [${v}-${p}-agent-java] 及 [\${SEARCH_KEY}] 的歷史 Log..."
               mkdir -p /data/logs
 
-              S3_FILES=\$(aws s3 api list-objects-v2 --bucket kklo-logs --query "Contents[?contains(Key, '\${SEARCH_KEY}') || contains(Key, '${v}-agent-java')].Key" --output text --region ap-east-1 2>/dev/null || true)
+              S3_FILES=\$(aws s3 api list-objects-v2 --bucket kklo-logs --query "Contents[?contains(Key, '\${SEARCH_KEY}') || contains(Key, '${v}-${p}-agent-java')].Key" --output text --region ap-east-1 2>/dev/null || true)
 
               if [ -n "\${S3_FILES}" ] && [ "\${S3_FILES}" != "None" ]; then
                 for S3_KEY in \${S3_FILES}; do
@@ -98,7 +98,7 @@ spec:
 
       containers:
         # 主服務容器
-        - name: "${v}-agent-java"
+        - name: "${v}-${p}-agent-java"
           image: public.ecr.aws/f2z7x9a1/ttko-666:springboot-agent-god
           imagePullPolicy: Always
           securityContext:
@@ -120,7 +120,7 @@ spec:
             - name: SPRING_NAME
               value: "${v}-${p}"
             - name: SPRING_POD_NAME
-              value: "${v}-agent-java"
+              value: "${v}-${p}-agent-java"
             - name: SPRING_LOGSTASH_URL
               value: "${c}"
             - name: SPRING_TG_CHAT
@@ -199,7 +199,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: "${v}-agent-java"
+  name: "${v}-${p}-agent-java"
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "external"
     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
@@ -218,10 +218,10 @@ spec:
       targetPort: 8081
       protocol: TCP
   selector:
-    app: "${v}-agent-java"
+    app: "${v}-${p}-agent-java"
 EOF
 
 kubectl apply -f 123.yaml
 
 rm -rf 123.yaml
-kubectl rollout status deployment.apps/"$v"-agent-java
+kubectl rollout status deployment.apps/"${v}-${p}-agent-java"
