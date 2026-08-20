@@ -11,7 +11,7 @@ c=$6
 date_now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # exp
-# sh update-agent-java-pod.sh scmk 001 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
+# sh update-agent-java-pod.sh scmk 666-001 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
 
 rm -rf /root/.kube/
 aws eks update-kubeconfig --region ap-east-1 --name dgp-live
@@ -117,6 +117,8 @@ spec:
               value: "15ef2e33783d4d575ded2cf1df82e933ccd64c69"
             - name: SPRING_REDIS_IP
               value: "${b}"
+            - name: SPRING_NAME
+              value: "${v}-${p}"
             - name: SPRING_POD_NAME
               value: "${v}-agent-java"
             - name: SPRING_LOGSTASH_URL
