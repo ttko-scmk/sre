@@ -16,7 +16,7 @@ h=$4
 #aws ec2 create-tags --resources "$IP_ID" --tags Key=Name,Value="$v"-IP
 
 #創建機器
-EC2_ID=`aws ec2 run-instances --image-id ami-0f8de810a3582c405 --instance-type "$h" --key-name greed --subnet-id "$p" --security-group-ids sg-04a4721c9abc4a30a --private-ip-address "$t" --query 'Instances[0].InstanceId' --output text`
+EC2_ID=`aws ec2 run-instances --image-id ami-0bd3805499aedcf3a --instance-type "$h" --key-name kklo --subnet-id "$p" --security-group-ids sg-093e2cbf7cc282827 --private-ip-address "$t" --query 'Instances[0].InstanceId' --output text`
 #EC2_ID=`aws ec2 run-instances --image-id ami-08fb1a36e9669c988 --instance-type "$h" --key-name greedyu --subnet-id "$p" --security-group-ids sg-02101d0d0044bb912 --private-ip-address "$t" --query 'Instances[].InstanceId[]' | jq '.[]'  |  tr -d '"'`
 
 #設標籤
