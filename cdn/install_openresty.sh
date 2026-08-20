@@ -35,10 +35,10 @@ rm -f /usr/bin/nginx /usr/sbin/nginx
 ln -s /usr/local/openresty/nginx/sbin/nginx /usr/bin/nginx
 ln -s /usr/local/openresty/nginx/sbin/nginx /usr/sbin/nginx
 
-# 建立相關設定目錄
+# 建立相關設定目錄與指定日誌目錄 (/var/log/nginx)
 mkdir -p /usr/local/openresty/nginx/conf/vhosts
 mkdir -p /usr/local/openresty/nginx/conf/ssl
-mkdir -p /usr/local/openresty/nginx/logs
+mkdir -p /var/log/nginx
 
 echo "=== 6. 部署 SSL 憑證 ==="
 cat << 'EOF' > /usr/local/openresty/nginx/conf/ssl/ca.key
@@ -121,25 +121,28 @@ CSqGSIb3DQEBDQUAA4ICAQCKuqnEzATN8Uah4Jn+vSdEMEMOdPjU1m61Moz7c/C/
 sI1Kfzwa/0Ubbs1OR0x0bqz2K6Gwe6VwKJ9DybFUh7SmBnt6gwt4cxRdM7EHMTZV
 9ofTMC8zvlNN/3g4yqtA80JIp7ZyVH5O//6dc5rc/C3EdUrKtmKb/TSlTqMA06S8
 YqgqhVVKLu1pDixtLBHMJOB+7pNmU6QFA+9vsxfQqfNBeuogZik7DVTHtA6GmFZC
-EIxetEZ57InyU4talCzHsenkbm15MhZDvsEuS1Q1pZmwxbu/Uu7+AxYpB8oReAM6
-nGPxwHf+z2Ypx/rAIwx/zCp81DCujx8CtrKA1CxVl2Mdp2VVznUeInVKZ6cL5xmG
-/AyLcqiOUE8dt43SkCzMeNeQu91LfcRUJ1jinHDygpLjm8HanL2CroSr54BG+2lc
-JbBcNLCfml/yge4LfvVr8URmdodEzyIE9bdDIfkyWWZ8heyY17l433w9HxcL4UEp
-N5QyDSiLjJtnAEAa87xuaa4wpeTEMgIIfspjh3tkWRp3xZ6TC9E1sJS3kiEvPmWo
-0MCAPuSsaRwEPvpkj+mKkG0rY1JwXMd9X8fOTUHrcz7zTdrEX69KxECXI6RllTDs
-OMvEwEgXS7YDx7HlvJ2UHQraKmJW4fjN/w+wkm//4iEvnwptbFx0Uw84V4bwNEji
-rw==
+EIxetEZ57InyU4talCzHsenkbm15MhZDvsEIxetEZ57InyU4talCzHsenkbm15Mh
+ZDvsEuS1Q1pZmwxbu/Uu7+AxYpB8oReAM6nGPxwHf+z2Ypx/rAIwx/zCp81DCujx
+8CtrKA1CxVl2Mdp2VVznUeInVKZ6cL5xmG/AyLcqiOUE8dt43SkCzMeNeQu91Lfc
+RUJ1jinHDygpLjm8HanL2CroSr54BG+2lcJbBcNLCfml/yge4LfvVr8URmdodEzy
+IE9bdDIfkyWWZ8heyY17l433w9HxcL4UEpN5QyDSiLjJtnAEAa87xuaa4wpeTEMg
+IIfspjh3tkWRp3xZ6TC9E1sJS3kiEvPmWo0MCAPuSsaRwEPvpkj+mKkG0rY1JwXM
+d9X8fOTUHrcz7zTdrEX69KxECXI6RllTDsOMvEwEgXS7YDx7HlvJ2UHQraKmJW4f
+jN/w+wkm//4iEvnwptbFx0Uw84V4bwNEjirw==
 -----END CERTIFICATE-----
 EOF
 
 chmod 600 /usr/local/openresty/nginx/conf/ssl/ca.key
 chmod 644 /usr/local/openresty/nginx/conf/ssl/ca.pem
 
-echo "=== 7. 覆寫 nginx.conf 主設定 ==="
+echo "=== 7. 覆寫 nginx.conf 主設定 (指定日誌至 /var/log/nginx) ==="
 cat << 'EOF' > /usr/local/openresty/nginx/conf/nginx.conf
 user  root;
 worker_processes  auto;
 worker_rlimit_nofile 100000;
+
+# 全域 Error Log
+error_log  /var/log/nginx/error.log warn;
 
 events {
     worker_connections  65535;
@@ -196,6 +199,9 @@ http {
         '"domain": "$scheme://$server_name"'
     '}';
 
+    # 全域 Access Log
+    access_log /var/log/nginx/access.log main;
+
     sendfile        on;
     keepalive_timeout  65;
 
@@ -214,14 +220,14 @@ http {
 }
 EOF
 
-echo "=== 8. 部署 default.conf 預設站點 (相對路徑) ==="
+echo "=== 8. 部署 default.conf 預設站點 ==="
 cat << 'EOF' > /usr/local/openresty/nginx/conf/vhosts/default.conf
 server {
     listen 80 default_server;
     listen 443 ssl default_server;
     listen [::]:443 ssl default_server;
     
-    # 採用相對路徑 (相對於 /usr/local/openresty/nginx/)
+    # 相對路徑 (相對於 /usr/local/openresty/nginx/)
     ssl_certificate     conf/ssl/ca.pem;
     ssl_certificate_key conf/ssl/ca.key;
 
@@ -257,9 +263,9 @@ server {
 }
 EOF
 
-echo "=== 9. 配置 Logrotate 日誌切割 ==="
+echo "=== 9. 配置 Logrotate 日誌切割 (切換至 /var/log/nginx/) ==="
 cat << 'EOF' > /etc/logrotate.d/openresty
-/usr/local/openresty/nginx/logs/*.log {
+/var/log/nginx/*.log {
     daily
     dateext
     dateformat -%Y-%m-%d
