@@ -2,7 +2,7 @@
 set -e
 v=$1
 rm -rf /root/.kube/
-aws eks update-kubeconfig --region ap-east-1  --name scmk-666 > /dev/null
+aws eks update-kubeconfig --region ap-east-1  --name dgp-live > /dev/null
 #exp
 #sh /data/eks/666/get-pod-status.sh aolinpike
 
