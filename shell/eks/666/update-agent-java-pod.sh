@@ -11,7 +11,7 @@ c=$6
 #sh update-agent-java-pod.sh scmk 001 scmk02-live.cluster-crq0wu4woeyc.ap-east-1.rds.amazonaws.com scmk-live-instance-1.crq0wu4woeyc.ap-east-1.rds.amazonaws.com:3306/scmk 10.7.200.10 logstash.taidagediao.com:4582
 
 rm -rf /root/.kube/
-aws eks update-kubeconfig --region ap-east-1 --name scmk-666
+aws eks update-kubeconfig --region ap-east-1 --name dgp-live
 
 if kubectl get deployment.apps/"$v"-agent-java &> /dev/null; then
   echo "Deployment "$v"-agent-java 存在，正在删除..."
