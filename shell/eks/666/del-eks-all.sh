@@ -30,9 +30,9 @@ kubectl delete service/"$v"-websocke-java
 kubectl delete ing/"$v"-websocke-java
 sleep 5
 #刪除NODE
-aws cloudformation delete-stack --stack-name eksctl-scmk-666-nodegroup-"$v"-"$p"  --region ap-east-1
+aws cloudformation delete-stack --stack-name eksctl-dgp-live-nodegroup-"$v"-"$p"  --region ap-east-1
 sleep 5
-aws cloudformation delete-stack --stack-name eksctl-scmk-666-nodegroup-"$v"-"$c"  --region ap-east-1
+aws cloudformation delete-stack --stack-name eksctl-dgp-live-nodegroup-"$v"-"$c"  --region ap-east-1
 #刪除NGINX 
 ssh 10.8.217.207 "rm -rf /usr/local/nginx/conf/vhosts/"$v"*"
 ssh 10.8.217.207 "nginx -t"
