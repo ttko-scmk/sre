@@ -5,7 +5,7 @@ p=$2
 b=$3
 c=$4
 rm -rf /root/.kube/
-aws eks update-kubeconfig --region ap-east-1 --name scmk-666
+aws eks update-kubeconfig --region ap-east-1 --name dgp-live
 #exp
 #sh del-eks-all.sh scmk 001 10.7.200.10
 #刪除POD 服務
