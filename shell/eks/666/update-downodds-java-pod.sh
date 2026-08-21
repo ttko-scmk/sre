@@ -13,13 +13,13 @@ c=$6
 rm -rf /root/.kube/
 aws eks update-kubeconfig --region ap-east-1 --name dgp-live
 
-if kubectl get deployment.apps/"${v}-${p}-agent-java" &> /dev/null; then
-  echo "Deployment ${v}-${p}-agent-java 存在，正在刪除..."
-  kubectl delete deployment.apps/"${v}-${p}-agent-java" --force --grace-period=0
+if kubectl get deployment.apps/"${v}-${p}-downodds-java" &> /dev/null; then
+  echo "Deployment ${v}-${p}-downodds-java 存在，正在刪除..."
+  kubectl delete deployment.apps/"${v}-${p}-downodds-java" --force --grace-period=0
   sleep 4
-  echo "Deployment ${v}-${p}-agent-java 已刪除。"
+  echo "Deployment ${v}-${p}-downodds-java 已刪除。"
 else
-  echo "Deployment ${v}-${p}-agent-java 不存在，無需刪除。"
+  echo "Deployment ${v}-${p}-downodds-java 不存在，無需刪除。"
 fi
 
 cat << EOF > 123.yaml
