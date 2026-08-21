@@ -30,8 +30,8 @@ spec:
   replicas: 1
   revisionHistoryLimit: 1
   strategy:
-    type: Rolling02Update
-    rolling02Update:
+    type: RollingUpdate
+    rollingUpdate:
       maxUnavailable: 100%
       maxSurge: 0
   selector:
@@ -48,7 +48,7 @@ spec:
         dgplive: "$v"-"$p"
       containers:
         - name: "${v}-${p}-agent-ng02
-          image: public.ecr.aws/f2z7x9a1/ttko-666:spring02boot-agent-ng02-god
+          image: public.ecr.aws/f2z7x9a1/ttko-666:sprin2boot-agent-ng-god
           imagePullPolicy: Always
           ports:
             - name: http
@@ -82,10 +82,10 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-type: "external"
     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
-    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing02-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
     #service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*" # 或檢查對應 NLB 關閉 client IP preserve 的參數
     #service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "stickiness.enabled=true,deregistration_delay.timeout_seconds=15"
-    # 【已改回 TCP 模式】避免 Spring02 Boot 根目錄回傳 403 造成 AWS 誤判 Unhealthy
+    # 【已改回 TCP 模式】避免 Spring Boot 根目錄回傳 403 造成 AWS 誤判 Unhealthy
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "TCP"
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "80"
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval-seconds: "10"
